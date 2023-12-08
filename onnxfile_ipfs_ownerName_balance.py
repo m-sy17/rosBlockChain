@@ -214,7 +214,7 @@ class ONNXInference:
         #print("distance : ", self.agent_distance, " angle : ", self.agent_angle)
 
     def tag_callback(self, data):
-        rospy.loginfo(rospy.get_caller_id()+" I heard %s",data.data)
+        rospy.loginfo(rospy.get_caller_id()+" I'm in the %s",data.data)
 
         self.tagName = data.data
         # print('subscribe tag : ', self.tagName)
@@ -235,7 +235,7 @@ class ONNXInference:
         os.remove(self.onnx_filename)
         self.modelName_dict.clear()
         print("delete onnx")
-        self.file_delete.set()
+
 
         # time.sleep(30)
         
@@ -309,12 +309,21 @@ class ONNXInference:
                 # twist.linear.x = 0.0
                 # twist.angular.z = 0.0
                 # print('download twist', twist)
-                self.inference_enabled = False
+                self.file_delete.set()
+                print('request ', self.tagName, ' onnx model')
+                zero_vel = Twist()
+                zero_vel.linear.x = 0
+                zero_vel.linear.y = 0
+                zero_vel.linear.z = 0
+                zero_vel.angular.x = 0
+                zero_vel.angular.y = 0
+                zero_vel.angular.z = 0
+                self._twist_pub.publish(zero_vel)
                 self.onnx_filename = self.get_onnx_hash()
-                print('set onnx model : ', self.onnx_filename)
+                print('set onnx model, file name : ', self.onnx_filename)
                 self.modelName_dict[self.tagName] = self.onnx_filename
                 self.inferenceSession_dict[self.tagName] = onnxruntime.InferenceSession(self.onnx_filename)
-                self.inference_enabled = True  # モデルのダウンロードが完了したら inference を有効にする
+                # self.inference_enabled = True  # モデルのダウンロードが完了したら inference を有効にする
 
             if not self.inference_enabled:
                 print('Model download in progress. Inference is disabled.')
