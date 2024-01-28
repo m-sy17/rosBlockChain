@@ -46,7 +46,7 @@ class ONNXInference:
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
         self.web3.is_connected()
         # self.web3.eth.default_account = self.web3.eth.accounts[4]
-        self.default_account = self.web3.eth.accounts[1]
+        self.default_account = self.web3.eth.accounts[2]
         
         # Ganacheの残高をCSVファイルにする関連
         self.accounts = self.web3.eth.accounts
@@ -214,40 +214,45 @@ class ONNXInference:
         #print("distance : ", self.agent_distance, " angle : ", self.agent_angle)
 
     def tag_callback(self, data):
-        rospy.loginfo(rospy.get_caller_id()+" I'm in the %s",data.data)
-
+        # rospy.loginfo(rospy.get_caller_id()+" I'm in the %s",data.data)
         self.tagName = data.data
         # print('subscribe tag : ', self.tagName)
         self.tag_received.set()  # タグを受信したらイベントを設定
         
     def reach_callback(self, data):
+        zero_vel = Twist()
+        zero_vel.linear.x = 0
+        zero_vel.linear.y = 0
+        zero_vel.linear.z = 0
+        zero_vel.angular.x = 0
+        zero_vel.angular.y = 0
+        zero_vel.angular.z = 0
+        self._twist_pub.publish(zero_vel)
         rospy.loginfo(rospy.get_caller_id()+" I heard %s",data.data)
         self.reach_count += 1
-        # for filename in os.listdir(self.model_directory):
-        #     file_path = os.path.join(self.model_directory, filename)
-        #     try:
-        #         if os.path.isfile(file_path) or os.path.islink(file_path):
-        #             os.unlink(file_path)
-        #         elif os.path.isdir(file_path):
-        #             os.rmdir(file_path)
-        #     except Exception as e:
-        #         rospy.logwarn(f"Failed to delete {file_path}. Error: {e}")
-        os.remove(self.onnx_filename)
+        # file delete
+        file_lists = os.listdir(self.onnx_filepath)
+        for filename in file_lists:
+            if filename.endswith('.onnx'):
+                file_path = os.path.join(self.onnx_filepath, filename)
+                os.remove(file_path)
+        # os.remove(self.onnx_filename)
         self.modelName_dict.clear()
+        self.inferenceSession_dict.clear()
+        print(self.model_directory)
         print("delete onnx")
-
-
         # time.sleep(30)
         
     #connect contract & get onnx flie hash address
     def get_onnx_hash(self):
         self.tag_received.wait()
         contract = self.web3.eth.contract(address=self.contract_address, abi=self.contract_abi)
+        print("---------------caontract info-----------------")
         print("contract : ", contract)
         transaction = {
             'from': self.default_account,
-            'gas': 4000000,
-            'gasPrice': self.web3.to_wei('21', 'gwei'),
+            # 'gas': 4000000,
+            # 'gasPrice': self.web3.to_wei('21', 'gwei'),
             'to': self.contract_address,  # コントラクトのアドレスを指定
             # 'to': self.web3.eth.accounts[0],
             'value': self.web3.to_wei(1, 'ether'),  # 送金するEtherの量
@@ -262,14 +267,17 @@ class ONNXInference:
         do_transact = contract.functions.getHash(self.tagName).transact({'from': self.default_account})
         print('do_contract : ', do_transact)
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(do_transact)
+        print("---------------caontract info-----------------")
 
+        print("--------------model file info------------------")
         self.onnx_filename = f'downloaded_model_{self.tagName}.onnx'
         print("file name", self.onnx_filename)
-        onnx_filepath = os.getcwd()
-        print("file path : ", onnx_filepath)
+        self.onnx_filepath = os.getcwd()
+        print("file path : ", self.onnx_filepath)
+        print("--------------model file info------------------")
 
 
-        if not os.path.isfile(onnx_filepath):
+        if not os.path.isfile(self.onnx_filepath):
             # ファイルが存在しない場合のみダウンロード
             print('--------------file download --------------')
             ipfs_url = f'https://ipfs.io/ipfs/{onnx_hash}'
@@ -278,7 +286,7 @@ class ONNXInference:
                 onnx_file.write(response.content)
             print('---------------fin download----------------')
 
-            # アカウントごとに残高を取得し、CSVデータに追加
+        # アカウントごとに残高を取得し、CSVデータに追加
         for account in self.accounts:
             balance_wei = self.web3.eth.get_balance(account)
             balance_eth = self.web3.from_wei(balance_wei, 'ether')
@@ -320,9 +328,15 @@ class ONNXInference:
                 zero_vel.angular.z = 0
                 self._twist_pub.publish(zero_vel)
                 self.onnx_filename = self.get_onnx_hash()
-                print('set onnx model, file name : ', self.onnx_filename)
+                # print('set onnx model, file name : ', self.onnx_filename)
                 self.modelName_dict[self.tagName] = self.onnx_filename
-                self.inferenceSession_dict[self.tagName] = onnxruntime.InferenceSession(self.onnx_filename)
+                print("-------------dict info---------------")
+                print('modelName_dict : ', self.modelName_dict)
+                session= onnxruntime.InferenceSession(self.onnx_filename)
+                print("session")
+                self.inferenceSession_dict[self.tagName] = session
+                print('inferenceSession_dict : ', self.inferenceSession_dict)
+                print("-------------dict info---------------")
                 # self.inference_enabled = True  # モデルのダウンロードが完了したら inference を有効にする
 
             if not self.inference_enabled:
@@ -335,7 +349,7 @@ class ONNXInference:
                 return twist  # モデルがダウンロード中は速度0、角速度0を返す
             # print('onnx model name : ', self.model_dict[self.tagName])
             session = self.inferenceSession_dict[self.tagName]
-            print('set onnx model : ', self.modelName_dict[self.tagName])
+            # print('set onnx model : ', self.modelName_dict[self.tagName])
 
             # 受け取ったデータを使ってONNXモデルで推論を実行
             if self.camera_image is not None:
@@ -367,8 +381,8 @@ class ONNXInference:
             #angular=0
 
             twist = Twist()
-            twist.linear.x = 1.0*linear
-            twist.angular.z = 1.0*angular
+            twist.linear.x = 0.7*linear
+            twist.angular.z = 0.7*angular
             # print('Returning twist:', twist)
                     
             return twist
@@ -395,7 +409,7 @@ if __name__ == '__main__':
     rospy.Subscriber("robot_distance_angle", PoseStamped, onnx_inference.pose_callback)
     rospy.Subscriber("camera_image", Image, onnx_inference.image_callback)
     rospy.Subscriber("target_reach", String, onnx_inference.reach_callback)
-    
+      
     rate = rospy.Rate(10) 
     # while not rospy.is_shutdown():
     #     cmd_vel = onnx_inference.inference()
