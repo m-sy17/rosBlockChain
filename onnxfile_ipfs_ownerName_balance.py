@@ -20,7 +20,7 @@ import requests
 import csv
 
 import os
-
+import sys
 
 class ONNXInference:
     def __init__(self, model_directory):
@@ -46,14 +46,18 @@ class ONNXInference:
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
         self.web3.is_connected()
         # self.web3.eth.default_account = self.web3.eth.accounts[4]
-        self.default_account = self.web3.eth.accounts[2]
+        self.default_account = self.web3.eth.accounts[7]
         
         # Ganacheの残高をCSVファイルにする関連
         self.accounts = self.web3.eth.accounts
         self.reach_count = 0
-        self.csv_data = [["Account", "Balance (ETH)"]]
+        self.csv_data = []
+        for account in self.accounts:
+            balance_wei = self.web3.eth.get_balance(account)
+            balance_eth = self.web3.from_wei(balance_wei, 'ether')
+            self.csv_data.append([account ,balance_eth])
+        # print(self.csv_data)
         self.csv_file_path = os.path.join(os.getcwd(), "balances.csv")
-
 
         # ディレクトリ関連
         self.model_directory = model_directory
@@ -61,7 +65,6 @@ class ONNXInference:
             os.makedirs(self.model_directory)
         self.file_delete = threading.Event()
         self.file_delete.set()
-
 
         # コントラクトのアドレス管理
         with open("rosipfs_contract_address.json", "r") as f:
@@ -241,6 +244,8 @@ class ONNXInference:
         self.inferenceSession_dict.clear()
         print(self.model_directory)
         print("delete onnx")
+        if self.reach_count >= 4:
+            self.recode_balues() 
         # time.sleep(30)
         
     #connect contract & get onnx flie hash address
@@ -285,22 +290,15 @@ class ONNXInference:
             with open(self.onnx_filename, 'wb') as onnx_file:
                 onnx_file.write(response.content)
             print('---------------fin download----------------')
-
         # アカウントごとに残高を取得し、CSVデータに追加
-        for account in self.accounts:
+        account_count=0
+        for account in self.accounts:    
             balance_wei = self.web3.eth.get_balance(account)
             balance_eth = self.web3.from_wei(balance_wei, 'ether')
-            self.csv_data.append([account, balance_eth])
-
-        # CSVファイルに書き込む
-        with open(self.csv_file_path, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(self.csv_data)
-
-        print("Balances updated in CSV file")
+            self.csv_data[account_count].append(balance_eth)
+            account_count += 1
         self.inference_enabled = True
         return self.onnx_filename
-        
 
     def inference(self):
         self.file_delete.wait()
@@ -400,6 +398,13 @@ class ONNXInference:
             # モデルがダウンロード済みの場合だけ座標を更新する
             self._twist_pub.publish(cmd_vel)
             # print(cmd_vel)
+
+    # CSVファイルに書き込む用の関数
+    def recode_balues(self):
+        with open(self.csv_file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(self.csv_data)
+        print("Balances updated in CSV file")
 
 if __name__ == '__main__':
     model_directory = "/home/moriokalab/catkin_ws/src/hello/src/model_directory"
