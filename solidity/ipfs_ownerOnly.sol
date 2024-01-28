@@ -33,23 +33,7 @@ contract IPFS {
 
 
     function getHash(string memory _hashName) public payable returns (string memory) {
-        // uint fee = 1.0 ether;
         IpfsData storage data = ipfsData[_hashName];
-        // require(data.owner != address(0), "No sender recorded for the given hash name");
-        // require(msg.value > 0, "Send ETH to retrieve IPFS hash");
-
-        // require(fee <= balance[msg.sender]);
-        //マップの共有主にfeeを送信
-        //payable(maps[_name].owner).transfer(fee);
-        // (bool success, ) = payable(ipfsData[_hashName].owner).call{value: fee}("");
-        // require(success, "Failed to send Ethere");
-
-        // balance[msg.sender] -= fee;
-
-        // payable(data.sender).transfer(msg.value);
-        // // アカウントの残高を更新
-        // balance[data.sender] -= msg.value;
-
         return data.ipfsHash;
     }
 }
