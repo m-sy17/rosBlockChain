@@ -145,13 +145,11 @@ def store_ipfs_hash_in_contract(contract_address, hashName, ipfs_hash):
 
 if __name__ == "__main__":
     hashName1 = 'Park'
-    ipfs_name1 = 'park'
     ipfs_hash1 = "QmdTHBrv81qo7i68BVQZjW66yRC6gQgLMvB4PETbCWFuDv"
     # ipfs_hash1 = "QmVuKEjUpeJjwRRzmkaRytW1obPxQa8J2K4GJKWRPy6j6v"
 
-    # hashName2 = 'City'
-    # ipfs_name2 = 'city'
-    # ipfs_hash2 = "QmR82CgfTv27Ms7cfZg9dKhhCh69FuY1FURbj8BcdLo473"
+    hashName2 = 'City'
+    ipfs_hash2 = "QmR82CgfTv27Ms7cfZg9dKhhCh69FuY1FURbj8BcdLo473"
     # ipfs_hash2 = "QmYpobzTjcJ2hX5Zs8spWv9Un395cagiXDvUUQKz7nQ5tN"
     contract_address = None  # デプロイ後にコントラクトアドレスを設定
 
@@ -162,8 +160,8 @@ if __name__ == "__main__":
     # スマートコントラクトにIPFSハッシュを格納
     store_ipfs_hash_in_contract(contract_address, hashName1, ipfs_hash1)
     print("IPFS hash stored in contract :", hashName1, ' : ', ipfs_hash1)
-    # store_ipfs_hash_in_contract(contract_address, hashName2, ipfs_hash2)
-    # print("IPFS hash stored in contract :", hashName2, ' : ', ipfs_hash2)
+    store_ipfs_hash_in_contract(contract_address, hashName2, ipfs_hash2)
+    print("IPFS hash stored in contract :", hashName2, ' : ', ipfs_hash2)
 
 
     # アドレスをファイルに保存

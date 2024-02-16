@@ -46,7 +46,7 @@ class ONNXInference:
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
         self.web3.is_connected()
         # self.web3.eth.default_account = self.web3.eth.accounts[4]
-        self.default_account = self.web3.eth.accounts[7]
+        self.default_account = self.web3.eth.accounts[1]
         
         # Ganacheの残高をCSVファイルにする関連
         self.accounts = self.web3.eth.accounts
@@ -252,7 +252,8 @@ class ONNXInference:
     def get_onnx_hash(self):
         self.tag_received.wait()
         contract = self.web3.eth.contract(address=self.contract_address, abi=self.contract_abi)
-        print("---------------caontract info-----------------")
+        
+        print("--------------------------------------------caontract info------------------------------------------------")
         print("contract : ", contract)
         transaction = {
             'from': self.default_account,
@@ -272,14 +273,14 @@ class ONNXInference:
         do_transact = contract.functions.getHash(self.tagName).transact({'from': self.default_account})
         print('do_contract : ', do_transact)
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(do_transact)
-        print("---------------caontract info-----------------")
+        print("--------------------------------------------caontract info------------------------------------------------")
 
-        print("--------------model file info------------------")
+        print("--------------------------------------------model file info-----------------------------------------------")
         self.onnx_filename = f'downloaded_model_{self.tagName}.onnx'
         print("file name", self.onnx_filename)
         self.onnx_filepath = os.getcwd()
         print("file path : ", self.onnx_filepath)
-        print("--------------model file info------------------")
+        print("--------------------------------------------model file info-----------------------------------------------")
 
 
         if not os.path.isfile(self.onnx_filepath):
@@ -331,10 +332,10 @@ class ONNXInference:
                 print("-------------dict info---------------")
                 print('modelName_dict : ', self.modelName_dict)
                 session= onnxruntime.InferenceSession(self.onnx_filename)
-                print("session")
                 self.inferenceSession_dict[self.tagName] = session
                 print('inferenceSession_dict : ', self.inferenceSession_dict)
                 print("-------------dict info---------------")
+                print("reach count : ", self.reach_count)
                 # self.inference_enabled = True  # モデルのダウンロードが完了したら inference を有効にする
 
             if not self.inference_enabled:
