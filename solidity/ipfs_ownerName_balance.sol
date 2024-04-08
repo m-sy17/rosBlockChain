@@ -34,11 +34,13 @@ contract IPFS {
 
     function getHash(string memory _hashName) public payable returns (string memory) {
         uint fee = 1.0 ether;
+        IpfsData storage data = ipfsData[_hashName];
         require(fee <= balance[msg.sender]);
         //マップの共有主にfeeを送信
         (bool success, ) = payable(ipfsData[_hashName].owner).call{value: fee}("");
         require(success, "Failed to send Ethere");
         balance[msg.sender] -= fee;
-        return ipfsData[_hashName].ipfsHash;
+        // return ipfsData[_hashName].ipfsHash;
+        return (data.ipfsHash);
     }
 }
