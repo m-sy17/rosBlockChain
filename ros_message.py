@@ -14,9 +14,9 @@ def main():
         msg.data = "A"
         pub.publish(msg)
         rospy.loginfo("Publish : " + msg.data)
-        msg.data = "B"
-        pub.publish(msg)
-        rospy.loginfo("Publish : " + msg.data)
+        # msg.data = "B"
+        # pub.publish(msg)
+        # rospy.loginfo("Publish : " + msg.data)
         r.sleep()
 
 if __name__ == "__main__":

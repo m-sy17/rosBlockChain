@@ -21,7 +21,6 @@ import csv
 
 import os
 import sys
-from solcx import compile_standard
 
 class ONNXInference:
     def __init__(self, model_directory):
@@ -47,7 +46,7 @@ class ONNXInference:
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
         self.web3.is_connected()
         # self.web3.eth.default_account = self.web3.eth.accounts[4]
-        self.default_account = self.web3.eth.accounts[0]
+        self.default_account = self.web3.eth.accounts[2]
         
         # Ganacheの残高をCSVファイルにする関連
         self.accounts = self.web3.eth.accounts
@@ -68,157 +67,123 @@ class ONNXInference:
         self.file_delete.set()
 
         # コントラクトのアドレス管理
-        with open("rosipfs_contract_address_park.json", "r") as f:
+        with open("rosipfs_contract_address.json", "r") as f:
             contract_data = json.load(f)
-        self.contract_address_park = contract_data["contract_address"]
-        print('contract address park : ', self.contract_address_park)
-        
-        with open("rosipfs_contract_address_city.json", "r") as f:
-            contract_data = json.load(f)
-        self.contract_address_city = contract_data["contract_address"]
-        print('contract address city : ', self.contract_address_city)
+        self.contract_address = contract_data["contract_address"]
+        print("contract addrsss" + self.contract_address)
 
         self.contract_abi = '''
-        [
+		        [
+	{
+		"anonymous": false,
+		"inputs": [
 			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": false,
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "Received",
-				"type": "event"
+				"indexed": false,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_hashName",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "_ipfsHash",
-						"type": "string"
-					}
-				],
-				"name": "addHash",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"name": "balance",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_hashName",
-						"type": "string"
-					}
-				],
-				"name": "getHash",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					},
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "payable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					}
-				],
-				"name": "ipfsData",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "ipfsHash",
-						"type": "string"
-					},
-					{
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_hashName",
-						"type": "string"
-					}
-				],
-				"name": "showIpfsData",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					},
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"stateMutability": "payable",
-				"type": "receive"
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
-		]
+		],
+		"name": "Received",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_hashName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_ipfsHash",
+				"type": "string"
+			}
+		],
+		"name": "addHash",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "balance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_hashName",
+				"type": "string"
+			}
+		],
+		"name": "getHash",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "ipfsData",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "ipfsHash",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+]
 		'''		
     
     def display_image(self):
@@ -248,19 +213,14 @@ class ONNXInference:
     def pose_callback(self, pose_msg):
         #print('dis and angle subscribe')
         # 受け取ったPoseStampedメッセージから距離と角度を抽出
-        self.agent_distance = pose_msg.pose.position.x
-        self.agent_angle = pose_msg.pose.position.y
+        self.agent_distance = pose_msg.data[0]
+        self.agent_angle = pose_msg.data[1]
         #print("distance : ", self.agent_distance, " angle : ", self.agent_angle)
 
     def tag_callback(self, data):
         # rospy.loginfo(rospy.get_caller_id()+" I'm in the %s",data.data)
         self.tagName = data.data
-        if self.tagName == "Park":
-            self.contract_address= self.contract_address_park
-        elif self.tagName =="City":
-            self.contract_address = self.contract_address_city
-        # print('subscribe tag : ', self.tagName)
-        # print('contract address : ', self.contract_address)
+        print('subscribe tag : ', self.tagName)
         self.tag_received.set()  # タグを受信したらイベントを設定
         
     def reach_callback(self, data):
@@ -301,19 +261,20 @@ class ONNXInference:
             # 'gas': 4000000,
             # 'gasPrice': self.web3.to_wei('21', 'gwei'),
             'to': self.contract_address,  # コントラクトのアドレスを指定
-            # 'to': self.web3.eth.accounts[0],
+            # 'to': '0xf2667684bee512e23a0cb7c533276a7a06618732009a5b3a2a56ae6e85dcf3d2',
             'value': self.web3.to_wei(1, 'ether'),  # 送金するEtherの量
             'nonce': self.web3.eth.get_transaction_count(self.default_account),
         }
-        print('transaction')
+        print('transaction', transaction)
         tx_hash = self.web3.eth.send_transaction(transaction)
         print('tx_hash : ', tx_hash)
-        print('tag name : ', self.tagName)
+        # print('recipt : ', tx_recipt)
         onnx_hash = contract.functions.getHash(self.tagName).call({'from': self.default_account})
         print('onnx ipfs hash check : ', onnx_hash)
         do_transact = contract.functions.getHash(self.tagName).transact({'from': self.default_account})
         print('do_contract : ', do_transact)
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(do_transact)
+
         print("--------------------------------------------caontract info------------------------------------------------")
 
         print("--------------------------------------------model file info-----------------------------------------------")
@@ -327,7 +288,7 @@ class ONNXInference:
         if not os.path.isfile(self.onnx_filepath):
             # ファイルが存在しない場合のみダウンロード
             print('--------------file download --------------')
-            ipfs_url = f'https://ipfs.io/ipfs/{onnx_hash[0]}'
+            ipfs_url = f'https://ipfs.io/ipfs/{onnx_hash}'
             response = requests.get(ipfs_url)
             with open(self.onnx_filename, 'wb') as onnx_file:
                 onnx_file.write(response.content)
@@ -453,7 +414,7 @@ if __name__ == '__main__':
     onnx_inference = ONNXInference(model_directory)
     rospy.init_node('onnx_inference_node')
     rospy.Subscriber("tag_environment", String, onnx_inference.tag_callback)
-    rospy.Subscriber("robot_distance_angle", PoseStamped, onnx_inference.pose_callback)
+    rospy.Subscriber("robot_distance_angle", Float32MultiArray, onnx_inference.pose_callback)
     rospy.Subscriber("camera_image", Image, onnx_inference.image_callback)
     rospy.Subscriber("target_reach", String, onnx_inference.reach_callback)
       
@@ -471,3 +432,6 @@ if __name__ == '__main__':
             onnx_inference.publish(cmd_vel)
         rate.sleep()
     rospy.spin()
+    
+    
+    # 卒論終了時点の完成版

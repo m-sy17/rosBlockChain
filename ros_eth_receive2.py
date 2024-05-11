@@ -29,7 +29,7 @@ class ImageView:
         # rospy.Subscriber("tag_message", String, self.tag_callback)
         # smart contaract 
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
-        self.web3.eth.default_account = self.web3.eth.accounts[3]
+        self.default_account = self.web3.eth.accounts[3]
         
         with open("rosEth_contract_address.json", "r") as f:
             contract_data = json.load(f)
@@ -165,7 +165,7 @@ class ImageView:
         self.contract = self.web3.eth.contract(address=self.contract_address, abi=self.contract_abi)
         print('contract : ', self.contract)
         tx_hash = self.web3.eth.send_transaction({
-            'from': self.web3.eth.default_account,
+            'from': self.default_account,
             'gas': 2000000,
             'gasPrice':self.web3.to_wei('21', 'gwei'),
 		})
@@ -187,12 +187,12 @@ class ImageView:
         rospy.loginfo("start get_ipfs_hash")
 
         # コントラクトの関数呼び出しでIPFSハッシュを取得
-        ipfs_hash = self.contract.functions.getHash("A").call({'from': self.web3.eth.default_account})
+        ipfs_hash = self.contract.functions.getHash("A").call({'from': self.default_account})
         print("ipfs_hash")
         # rospy.loginfo('ipfs_hash : ', ipfs_hash)
         # self.hash_received.set()
         # time.sleep(30)
-        do_transact = self.contract.functions.getHash('A').transact({'from': self.web3.eth.default_account})
+        do_transact = self.contract.functions.getHash('A').transact({'from': self.default_account})
         # print(self.tagName)
         # ipfs_hash = self.contract.functions.getHash(self.tagName).call()
         # do_transact = self.contract.functions.getHash(self.tagName).transact()

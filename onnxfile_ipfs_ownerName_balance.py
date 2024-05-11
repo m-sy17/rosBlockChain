@@ -46,7 +46,7 @@ class ONNXInference:
         self.web3 = Web3(Web3.HTTPProvider('http://localhost:7545'))
         self.web3.is_connected()
         # self.web3.eth.default_account = self.web3.eth.accounts[4]
-        self.default_account = self.web3.eth.accounts[0]
+        self.default_account = self.web3.eth.accounts[2]
         
         # Ganacheの残高をCSVファイルにする関連
         self.accounts = self.web3.eth.accounts
@@ -220,7 +220,7 @@ class ONNXInference:
     def tag_callback(self, data):
         # rospy.loginfo(rospy.get_caller_id()+" I'm in the %s",data.data)
         self.tagName = data.data
-        # print('subscribe tag : ', self.tagName)
+        print('subscribe tag : ', self.tagName)
         self.tag_received.set()  # タグを受信したらイベントを設定
         
     def reach_callback(self, data):
@@ -288,7 +288,7 @@ class ONNXInference:
         if not os.path.isfile(self.onnx_filepath):
             # ファイルが存在しない場合のみダウンロード
             print('--------------file download --------------')
-            ipfs_url = f'https://ipfs.io/ipfs/{onnx_hash[0]}'
+            ipfs_url = f'https://ipfs.io/ipfs/{onnx_hash}'
             response = requests.get(ipfs_url)
             with open(self.onnx_filename, 'wb') as onnx_file:
                 onnx_file.write(response.content)
